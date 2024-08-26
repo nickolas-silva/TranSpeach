@@ -1,6 +1,8 @@
-# transpeach
+# TranSpeach
 
-A new Flutter project.
+Projeto desenvolvido para a disciplina de Multimídia
+
+Autores: Níckolas Emanuel, Caio Vinicius e Thiago Henrique
 
 ## Getting Started
 

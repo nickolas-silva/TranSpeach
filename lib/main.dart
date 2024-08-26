@@ -13,6 +13,10 @@ class TranSpeachApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'TranSpeach',
+      theme: ThemeData(
+        fontFamily: 'Poppins',
+        primarySwatch: Colors.purple,
+      ),
       builder: (context, child) => 
         MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child!),
       navigatorKey: Get.key,
