@@ -33,9 +33,54 @@ class HomePage extends GetView<HomeController> {
           ],
         ),
       ),
-      body: Center(
-        child: Text('Home Page ${controller.teste}'),
-      ),
+      body: Stack(
+        children: [
+          //Messages Container
+          Container(
+            height: Get.height,
+            width: Get.width,
+            color: backgroundColor,
+          ),
+
+          //Inputas Sheet
+          Positioned(
+            bottom: 0,
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeIn,
+              child: Container(
+                height: 225,
+                width: Get.width,
+                decoration: const BoxDecoration(
+                  color: lightColor,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Traduzir para:',
+                        style: TextStyle(
+                          color: secondaryColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      
+                      
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      )
     );
   }
 }
