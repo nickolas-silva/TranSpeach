@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:transpeach/app/routes/app_pages.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:dart_openai/dart_openai.dart';
 
 Future main() async {
   await dotenv.load(fileName: ".env");
-  OpenAI.apiKey = dotenv.env["OPEN_AI_API_KEY"]!;
   runApp(const TranSpeachApp());
 }
 

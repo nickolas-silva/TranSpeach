@@ -1,0 +1,33 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: caiob
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: api-tts
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: api-tts
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "polly:SynthesizeSpeech"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+      Resource: "arn:aws:s3:::ttsbucket111/*"
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
+  convertPolly:
+      handler: handler.convertPolly
+      events:
+        - httpApi:
+            path: /converter
+            method: post

@@ -34,7 +34,10 @@ class HomePage extends GetView<HomeController> {
         ),
       ),
       body: Center(
-        child: Text('Home Page ${controller.teste}'),
+        child: TextButton(
+          child: const Text("Clica aqui pai"),
+          onPressed: () => controller.textToSpeech(),
+        ),
       ),
     );
   }
