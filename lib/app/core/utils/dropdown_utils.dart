@@ -20,7 +20,13 @@ List<DropdownMenuItem<String>> buildDropdownMenuItens(List<String> list, {List<S
           items.add(
             DropdownMenuItem(
               value: i.toString(),
-              child: Text(list[i]),
+              child: Text(
+                list[i],
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold
+                )
+              ),
             )
           );
         }
@@ -28,7 +34,13 @@ List<DropdownMenuItem<String>> buildDropdownMenuItens(List<String> list, {List<S
         items.add(
           DropdownMenuItem(
             value: i.toString(),
-            child: Text(list[i]),
+            child: Text(
+              list[i],
+              style: const TextStyle(
+                color: Colors.black, 
+                fontWeight: FontWeight.bold
+              )
+            ),
           )
         );
       }
