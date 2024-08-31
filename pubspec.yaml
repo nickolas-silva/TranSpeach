@@ -15,7 +15,6 @@ dependencies:
   flutter_svg: ^2.0.9
   get: ^4.6.6
   cupertino_icons: ^1.0.6
-  flutter_dotenv: ^5.1.0
   audioplayers: ^6.1.0
 dev_dependencies:
   flutter_test:
@@ -28,7 +27,6 @@ flutter:
 
   assets:
     - assets/images/
-    - .env
   fonts:
     - family: Poppins
       fonts:
