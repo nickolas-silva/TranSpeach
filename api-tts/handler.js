@@ -1,5 +1,6 @@
+require('dotenv').config();
 const AWS = require('aws-sdk');
-const BUCKET_NAME = "ttsbucket111";
+const BUCKET_NAME = process.env.S3_BUCKET;
 const s3 = new AWS.S3();
 const polly = new AWS.Polly();
 
