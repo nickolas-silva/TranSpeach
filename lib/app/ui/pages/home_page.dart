@@ -4,10 +4,26 @@ import 'package:get/get.dart';
 import 'package:transpeach/app/controllers/home_controller.dart';
 import 'package:transpeach/app/core/constants/default_const.dart';
 import 'package:transpeach/app/core/constants/img_file.dart';
+import 'package:transpeach/app/model/message.dart';
+import 'package:transpeach/app/service/messageService.dart';
 import 'package:transpeach/app/ui/components/language_dropdown.dart';
+import 'package:transpeach/app/ui/components/message_card.dart';
 
 class HomePage extends GetView<HomeController> {
-  const HomePage({super.key});
+  HomePage({super.key});
+
+  MessageService messageService = MessageService();
+  List<Message> messages = [];
+
+  void saveMessage(Message message) async {
+    try {
+      Message newMessage = await messageService.save(message);
+      print(newMessage);
+      messages.addAll(await messageService.getAll());
+    } catch (ex) {
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +57,11 @@ class HomePage extends GetView<HomeController> {
               height: Get.height,
               width: Get.width,
               color: backgroundColor,
+              child: Column(
+                children: [
+                  for (var message in messages) MessageCard(message: message)
+                ],
+              ),
             ),
 
             //Inputas Sheet
@@ -108,6 +129,8 @@ class HomePage extends GetView<HomeController> {
                                 //função de mandar msg
                                 onPressed: () {
                                   print(controller.textMessageController.text);
+                                  Message newMessage = Message(text: controller.textMessageController.text, sendAt: DateTime.now());
+                                  saveMessage(newMessage);
                                 },
                                 icon: const Icon(
                                   Icons.send,

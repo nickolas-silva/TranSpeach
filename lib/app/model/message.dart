@@ -14,7 +14,7 @@ class Message {
         id: json['id'],
         text: json['text'],
         translatedText: json['translatedText'],
-        sendAt: json['sendAt'],
+        sendAt: DateTime.parse(json['sendAt']),
         isTranslated: json['isTranslated']
     );
   }
@@ -22,8 +22,13 @@ class Message {
   Map<String, dynamic> toJson() => {
     'id': id,
     'text': text,
-    'sendAt': sendAt,
+    'sendAt': sendAt.toString(),
     'translatedText': translatedText,
     'isTranslated': isTranslated
   };
+
+  @override
+  String toString() {
+    return 'Message{id: $id, text: $text, sendAt: $sendAt, isTranslated: $isTranslated, translatedText: $translatedText}';
+  }
 }

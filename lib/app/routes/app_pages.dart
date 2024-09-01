@@ -7,7 +7,7 @@ class AppPages {
   final List<GetPage> pages = [
     GetPage(
       name: Routes.home,
-      page: () => const HomePage(),
+      page: () => HomePage(),
       binding: HomeBindings()
     )
   ];

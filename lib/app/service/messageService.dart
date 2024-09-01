@@ -13,13 +13,13 @@ class MessageService {
     try {
       final Database db = await DatabaseProvider().getDatabase();
 
-      if (message.id != 0) {
-        await db.update(DatabaseTables.MESSAGES.toString(), message.toJson(),
+      if (message.id != 0 && message.id != null) {
+        await db.update(DatabaseTables.MESSAGES.toShortString(), message.toJson(),
             where: 'id = ?', whereArgs: [message.id]);
         return message;
       }
       return await getById(await db.insert(
-          DatabaseTables.MESSAGES.toString(), message.toJson()));
+          DatabaseTables.MESSAGES.toShortString(), message.toJson()));
     } catch (ex) {
       rethrow;
     }
@@ -29,7 +29,7 @@ class MessageService {
     try {
       final Database db = await DatabaseProvider().getDatabase();
 
-      var data = await db.query(DatabaseTables.MESSAGES.toString(),
+      var data = await db.query(DatabaseTables.MESSAGES.toShortString(),
           where: 'id = ?', whereArgs: [id]);
 
       return Message.fromJson(data[0]);
@@ -43,7 +43,7 @@ class MessageService {
     try {
       final Database db = await DatabaseProvider().getDatabase();
 
-      await db.delete(DatabaseTables.MESSAGES.toString(),
+      await db.delete(DatabaseTables.MESSAGES.toShortString(),
           where: 'id = ?', whereArgs: [id]);
 
       return true;
@@ -57,7 +57,7 @@ class MessageService {
       final Database db = await DatabaseProvider().getDatabase();
 
       List<Map<String, Object?>> data = await db.query(
-        DatabaseTables.MESSAGES.toString(),
+        DatabaseTables.MESSAGES.toShortString(),
       );
 
       List<Message> messages = [];
