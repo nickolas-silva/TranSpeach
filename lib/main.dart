@@ -11,7 +11,7 @@ class TranSpeachApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'TranSpeach',
+      title: 'TranSpeech',
       theme: ThemeData(
         fontFamily: 'Poppins',
         primarySwatch: Colors.purple,

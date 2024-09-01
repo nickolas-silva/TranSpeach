@@ -18,7 +18,7 @@ class HomePage extends GetView<HomeController> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'TranSpeach',
+                'TranSpeech',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -106,7 +106,9 @@ class HomePage extends GetView<HomeController> {
                               ),
                               child: IconButton(
                                 //função de mandar msg
-                                onPressed: () {},
+                                onPressed: () {
+                                  print(controller.textMessageController.text);
+                                },
                                 icon: const Icon(
                                   Icons.send,
                                   color: Colors.white,
