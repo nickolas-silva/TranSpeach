@@ -1,4 +1,4 @@
-# TranSpeach
+# TranSpeech
 
 Projeto desenvolvido para a disciplina de Multimídia
 
