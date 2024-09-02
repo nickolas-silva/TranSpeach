@@ -17,7 +17,10 @@ provider:
       Action:
         - "s3:PutObject"
       Resource: "arn:aws:s3:::ttsbucket111/*"
-
+    - Effect: "Allow"
+      Action:
+        - "translate:TranslateText"
+      Resource: "*"
 functions:
   hello:
     handler: handler.hello
@@ -30,4 +33,10 @@ functions:
       events:
         - httpApi:
             path: /converter
+            method: post
+  translate:
+      handler: handler.translate
+      events:
+        - httpApi:
+            path: /translate
             method: post

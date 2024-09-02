@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const BUCKET_NAME = process.env.S3_BUCKET;
 const s3 = new AWS.S3();
 const polly = new AWS.Polly();
-
+const translate = new AWS.Translate()
 exports.convertPolly = async (event) => {
   try {
     const body = JSON.parse(event.body);
@@ -12,7 +12,7 @@ exports.convertPolly = async (event) => {
     if (!phrase2) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Erro ao informar o texto' }),
+        body: JSON.stringify({ error: "Erro ao informar o texto" }),
       };
     }
 
@@ -20,8 +20,8 @@ exports.convertPolly = async (event) => {
 
     const pollyParams = {
       Text: phrase2,
-      VoiceId: 'Vitoria',
-      OutputFormat: 'mp3',
+      VoiceId: "Vitoria",
+      OutputFormat: "mp3",
     };
 
     // Gera o áudio com Polly
@@ -30,7 +30,7 @@ exports.convertPolly = async (event) => {
     if (!pollyResult.AudioStream) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Erro ao processar audio' }),
+        body: JSON.stringify({ error: "Erro ao processar audio" }),
       };
     }
 
@@ -39,7 +39,7 @@ exports.convertPolly = async (event) => {
       Bucket: BUCKET_NAME,
       Key: audioName,
       Body: pollyResult.AudioStream,
-      ContentType: 'audio/mpeg',
+      ContentType: "audio/mpeg",
     };
 
     await s3.putObject(s3Params).promise();
@@ -51,7 +51,7 @@ exports.convertPolly = async (event) => {
       body: JSON.stringify({
         received_phrase: phrase2,
         url_to_audio: audioUrl,
-        created_audio: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+        created_audio: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
       }),
     };
 
@@ -63,6 +63,45 @@ exports.convertPolly = async (event) => {
   }
 };
 
+exports.translate = async(event)=>{
+  try{
+    const body = JSON.parse(event.body);
+    const text = body.text;
+    const to = body.to;
+    const from = body.from;
+
+    if (!text) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Erro ao informar o texto" }),
+      };
+    }
+
+    const translateParams = {
+      "SourceLanguageCode": from,
+      "TargetLanguageCode": to,
+      "Text" :text
+    }
+
+    const translateResult = await translate.translateText(translateParams).promise();
+
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        translated_text: translateResult.TranslatedText,
+        from: translateResult.SourceLanguageCode,
+        to: translateResult.TargetLanguageCode,
+     }),
+    };
+
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: error.message }),
+    };
+  }
+}
 
 exports.hello = async (event) => {
   return {
