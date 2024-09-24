@@ -8,6 +8,8 @@ import 'package:transpeach/app/model/message.dart';
 import 'package:transpeach/app/service/messageService.dart';
 import 'package:transpeach/app/ui/components/language_dropdown.dart';
 import 'package:transpeach/app/ui/components/message_card.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
 
 class HomePage extends GetView<HomeController> {
   HomePage({super.key});
@@ -114,7 +116,8 @@ class HomePage extends GetView<HomeController> {
                                     borderSide: BorderSide.none,
                                   ),
                                 ),
-                                controller: controller.textMessageController,
+                                controller:
+                                    controller.textMessageController.value,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -125,18 +128,41 @@ class HomePage extends GetView<HomeController> {
                                 color: primaryColor,
                                 shape: BoxShape.circle,
                               ),
-                              child: IconButton(
-                                //função de mandar msg
-                                onPressed: () {
-                                  print(controller.textMessageController.text);
-                                  Message newMessage = Message(text: controller.textMessageController.text, sendAt: DateTime.now());
-                                  saveMessage(newMessage);
-                                },
-                                icon: const Icon(
-                                  Icons.send,
-                                  color: Colors.white,
-                                ),
-                              ),
+                              child: Obx(() => controller.textMessageController
+                                      .value.text.isNotEmpty
+                                  ? IconButton(
+                                      //função de mandar msg
+                                      onPressed: () {
+                                        Message newMessage = Message(
+                                            text: controller
+                                                .textMessageController
+                                                .value
+                                                .text,
+                                            sendAt: DateTime.now());
+                                        saveMessage(newMessage);
+                                      },
+                                      icon: const Icon(
+                                        Icons.send,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : TextButton(
+                                      //função de mandar msg
+                                      onPressed: () {
+                                        if (controller.isRecording.value) {
+                                          // stop recording
+                                          controller.stopRecord();
+                                        } else {
+                                          controller.startRecord();
+                                        }
+                                      },
+                                      child: Icon(
+                                        controller.isRecording.value
+                                            ? Icons.cancel
+                                            : Icons.mic,
+                                        color: Colors.white,
+                                      ),
+                                    )),
                             )
                           ],
                         )

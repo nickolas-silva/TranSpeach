@@ -1,9 +1,9 @@
-require('dotenv').config();
-const AWS = require('aws-sdk');
+require("dotenv").config();
+const AWS = require("aws-sdk");
 const BUCKET_NAME = process.env.S3_BUCKET;
 const s3 = new AWS.S3();
 const polly = new AWS.Polly();
-const translate = new AWS.Translate()
+const translate = new AWS.Translate();
 exports.convertPolly = async (event) => {
   try {
     const body = JSON.parse(event.body);
@@ -16,7 +16,7 @@ exports.convertPolly = async (event) => {
       };
     }
 
-    const audioName = `audio-${phrase2.split(' ')[0]}.mp3`;
+    const audioName = `audio-${phrase2.split(" ")[0]}.mp3`;
 
     const pollyParams = {
       Text: phrase2,
@@ -51,10 +51,11 @@ exports.convertPolly = async (event) => {
       body: JSON.stringify({
         received_phrase: phrase2,
         url_to_audio: audioUrl,
-        created_audio: new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+        created_audio: new Date().toLocaleString("pt-BR", {
+          timeZone: "America/Sao_Paulo",
+        }),
       }),
     };
-
   } catch (error) {
     return {
       statusCode: 500,
@@ -63,8 +64,8 @@ exports.convertPolly = async (event) => {
   }
 };
 
-exports.translate = async(event)=>{
-  try{
+exports.translate = async (event) => {
+  try {
     const body = JSON.parse(event.body);
     const text = body.text;
     const to = body.to;
@@ -78,13 +79,14 @@ exports.translate = async(event)=>{
     }
 
     const translateParams = {
-      "SourceLanguageCode": from,
-      "TargetLanguageCode": to,
-      "Text" :text
-    }
+      SourceLanguageCode: from,
+      TargetLanguageCode: to,
+      Text: text,
+    };
 
-    const translateResult = await translate.translateText(translateParams).promise();
-
+    const translateResult = await translate
+      .translateText(translateParams)
+      .promise();
 
     return {
       statusCode: 200,
@@ -92,16 +94,17 @@ exports.translate = async(event)=>{
         translated_text: translateResult.TranslatedText,
         from: translateResult.SourceLanguageCode,
         to: translateResult.TargetLanguageCode,
-     }),
+      }),
     };
-
   } catch (error) {
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message }),
     };
   }
-}
+};
+
+exports.transcribe = async (event) => {};
 
 exports.hello = async (event) => {
   return {
