@@ -29,14 +29,20 @@ functions:
           path: /
           method: get
   convertPolly:
-      handler: handler.convertPolly
-      events:
-        - httpApi:
-            path: /converter
-            method: post
+    handler: handler.convertPolly
+    events:
+      - httpApi:
+          path: /converter
+          method: post
   translate:
-      handler: handler.translate
-      events:
-        - httpApi:
-            path: /translate
-            method: post
+    handler: handler.translate
+    events:
+      - httpApi:
+          path: /translate
+          method: post
+  uploadToBucket:
+    handler: handler.uploadToBucket
+    events:
+      - httpApi:
+          path: /upload
+          method: post

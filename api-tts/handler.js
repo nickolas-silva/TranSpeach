@@ -104,7 +104,66 @@ exports.translate = async (event) => {
   }
 };
 
-exports.transcribe = async (event) => {};
+exports.transcribe = async (event) => {
+  try {
+    const transcribe = new AWS.TranscribeService();
+
+    const { language, url_to_audio, outputBucketName } = event.body;
+
+    const params = {
+      TranscriptionJobName: "transcribe", // Nome do trabalho de transcrição
+      LanguageCode: "pt-BR", // Idioma do áudio
+      Media: {
+        MediaFileUri: "s3://your-bucket/your-audio-file.mp3", // Caminho para o arquivo no S3
+      },
+      OutputBucketName: "your-output-bucket", // Bucket S3 para o arquivo de saída
+      MediaFormat: "mp4", // Formato do arquivo de áudio (pode ser 'mp3', 'mp4', 'wav', 'flac')
+    };
+
+    transcribe.startTranscriptionJob(params, (err, data) => {
+      if (err) {
+        console.error("Erro ao iniciar a transcrição:", err);
+      } else {
+        console.log("Transcrição iniciada com sucesso:", data);
+      }
+    });
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: error.message }),
+    };
+  }
+};
+
+exports.uploadToBucket = async (event) => {
+  const fileContent = Buffer.from(event.body, "base64"); // O arquivo deve ser enviado como base64
+  const fileName = event.headers["file-name"]; // O nome do arquivo deve ser passado no cabeçalho
+
+  // Carrega o áudio no S3
+  const s3Params = {
+    Bucket: BUCKET_NAME,
+    Key: fileName,
+    Body: fileContent,
+    ContentType: "audio/mpeg",
+  };
+
+  try {
+    const data = await s3.putObject(s3Params).promise();
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        message: "Upload bem-sucedido!",
+        fileUrl: data.Location,
+      }),
+    };
+  } catch (err) {
+    console.log(err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Erro ao fazer upload." }),
+    };
+  }
+};
 
 exports.hello = async (event) => {
   return {
