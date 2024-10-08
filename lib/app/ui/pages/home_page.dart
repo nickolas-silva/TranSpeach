@@ -8,8 +8,6 @@ import 'package:transpeach/app/model/message.dart';
 import 'package:transpeach/app/service/messageService.dart';
 import 'package:transpeach/app/ui/components/language_dropdown.dart';
 import 'package:transpeach/app/ui/components/message_card.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:record/record.dart';
 
 class HomePage extends GetView<HomeController> {
   HomePage({super.key});
