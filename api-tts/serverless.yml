@@ -21,6 +21,13 @@ provider:
       Action:
         - "translate:TranslateText"
       Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "transcribe:*"
+        - "s3:GetObject"
+      Resource:
+        - "arn:aws:s3:::ttsbucket111/*"
+        - "arn:aws:transcribe:us-east-1:*:transcription-job/*"
 functions:
   hello:
     handler: handler.hello
@@ -40,8 +47,14 @@ functions:
       - httpApi:
           path: /translate
           method: post
-  uploadToBucket:
-    handler: handler.uploadToBucket
+  transcribe:
+    handler: handler.transcribe
+    events:
+      - httpApi:
+          path: /transcribe
+          method: post
+  upload:
+    handler: handler.upload
     events:
       - httpApi:
           path: /upload

@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_sound/flutter_sound.dart';
 
 class HomeController extends GetxController {
   final textMessageController = TextEditingController().obs;
@@ -26,7 +26,7 @@ class HomeController extends GetxController {
     super.onInit();
     PermissionStatus status = await Permission.microphone.request();
     // player.play(DeviceFileSource(
-    //     "/data/user/0/com.example.transpeach/app_flutter/meu_audio.aac"));
+    //     "/data/user/0/com.example.transpeach/app_flutter/meu_audio.mp4"));
   }
 
   void selectLanguage(String? value) {
@@ -52,12 +52,11 @@ class HomeController extends GetxController {
     }
   }
 
-  void speechToText() async {}
   void stopRecord() async {
     // Parar a gravação
-    await audioRecorder.stopRecorder();
-    // Fechar o gravador
+    String? path = await audioRecorder.stopRecorder();
     await audioRecorder.closeRecorder();
+    filePath = path!;
     isRecording.value = false;
     print('Áudio gravado: $filePath');
   }
@@ -72,9 +71,7 @@ class HomeController extends GetxController {
       String path = '${appDocDir.path}/meu_audio.aac';
       // Iniciar gravação
       await audioRecorder.openRecorder();
-      await audioRecorder.startRecorder(
-          toFile: path, // Nome do arquivo de saída
-          codec: Codec.aacADTS);
+      await audioRecorder.startRecorder(codec: Codec.aacADTS, toFile: path);
       isRecording.value = true;
       filePath = path;
     } else {
@@ -82,8 +79,78 @@ class HomeController extends GetxController {
     }
   }
 
+  void upload() async {
+    try {
+      player.play(DeviceFileSource(filePath));
+      final File audioFile = File(filePath);
+      final String base64Audio = await convertToBase64(filePath);
+      print(audioFile.uri.pathSegments.last);
+      // Criar o cabeçalho com o nome do arquivo
+      final Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'file-name': audioFile.uri.pathSegments.last, // Pega o nome do arquivo
+      };
+
+      // Criar o corpo da requisição
+      final Map<String, dynamic> body = {
+        'body': base64Audio,
+      };
+
+      // Enviar a requisição POST
+      final response = await http.post(
+        Uri.parse(
+            "https://4cpr8ijhx0.execute-api.us-east-1.amazonaws.com/upload"),
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      // Verificar a resposta
+      if (response.statusCode == 200) {
+        print('Áudio enviado com sucesso: ${response.body}');
+      } else {
+        print(
+            'Falha ao enviar áudio: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      print('Erro ao enviar áudio: $e');
+    }
+  }
+
+  void uploadAudio(String base64Audio) async {
+    print("Base64 Audio: $base64Audio"); // Verifique o valor do áudio em Base64
+
+    var uri = Uri.parse(
+        "https://4cpr8ijhx0.execute-api.us-east-1.amazonaws.com/transcribe");
+
+    // Cria o cabeçalho e o corpo da requisição
+    var request = http.Request('POST', uri)
+      ..headers['Content-Type'] = 'application/json'
+      ..headers['file-name'] = 'meu_audio.aac' // Nome do arquivo
+      ..body = jsonEncode({
+        'body': base64Audio,
+      });
+    try {
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        print('Transcrição bem-sucedida!');
+      } else {
+        print('Falha na transcrição: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Erro ao enviar para Lambda: $e');
+    }
+  }
+
+  void speechToText() async {
+    String base64Audio = await convertToBase64(filePath);
+    print('Audio em Base64: $base64Audio');
+
+    uploadAudio(base64Audio);
+  }
+
   Future<String> convertToBase64(String filePath) async {
     // Ler o arquivo como bytes
+    print(filePath);
     File file = File(filePath);
     List<int> fileBytes = await file.readAsBytes();
 

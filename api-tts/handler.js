@@ -4,6 +4,7 @@ const BUCKET_NAME = process.env.S3_BUCKET;
 const s3 = new AWS.S3();
 const polly = new AWS.Polly();
 const translate = new AWS.Translate();
+const transcribeService = new AWS.TranscribeService();
 exports.convertPolly = async (event) => {
   try {
     const body = JSON.parse(event.body);
@@ -104,65 +105,140 @@ exports.translate = async (event) => {
   }
 };
 
-exports.transcribe = async (event) => {
+exports.upload = async (event) => {
   try {
-    const transcribe = new AWS.TranscribeService();
-
-    const { language, url_to_audio, outputBucketName } = event.body;
-
-    const params = {
-      TranscriptionJobName: "transcribe", // Nome do trabalho de transcrição
-      LanguageCode: "pt-BR", // Idioma do áudio
-      Media: {
-        MediaFileUri: "s3://your-bucket/your-audio-file.mp3", // Caminho para o arquivo no S3
-      },
-      OutputBucketName: "your-output-bucket", // Bucket S3 para o arquivo de saída
-      MediaFormat: "mp4", // Formato do arquivo de áudio (pode ser 'mp3', 'mp4', 'wav', 'flac')
+    const fileContent = Buffer.from(event.body, "base64");
+    const fileName = event.headers["file-name"];
+    console.log(fileName);
+    // Carregar o áudio no S3
+    const s3Params = {
+      Bucket: BUCKET_NAME,
+      Key: fileName,
+      Body: fileContent,
+      ContentType: "audio/aac",
     };
 
-    transcribe.startTranscriptionJob(params, (err, data) => {
-      if (err) {
-        console.error("Erro ao iniciar a transcrição:", err);
-      } else {
-        console.log("Transcrição iniciada com sucesso:", data);
-      }
-    });
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
-    };
-  }
-};
-
-exports.uploadToBucket = async (event) => {
-  const fileContent = Buffer.from(event.body, "base64"); // O arquivo deve ser enviado como base64
-  const fileName = event.headers["file-name"]; // O nome do arquivo deve ser passado no cabeçalho
-
-  // Carrega o áudio no S3
-  const s3Params = {
-    Bucket: BUCKET_NAME,
-    Key: fileName,
-    Body: fileContent,
-    ContentType: "audio/mpeg",
-  };
-
-  try {
-    const data = await s3.putObject(s3Params).promise();
+    // Upload do áudio para o S3
+    await s3.putObject(s3Params).promise();
+    console.log("Arquivo enviado para o S3 com sucesso!");
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: "Upload bem-sucedido!",
-        fileUrl: data.Location,
+        message: "uploaded!",
       }),
     };
-  } catch (err) {
-    console.log(err);
+  } catch (e) {
+    console.error("Erro:", e);
     return {
       statusCode: 500,
       body: JSON.stringify({ message: "Erro ao fazer upload." }),
     };
   }
+};
+
+exports.transcribe = async (event) => {
+  try {
+    // Iniciar transcrição
+    const transcribeResult = await transcribeAudio(event);
+    const jobName = transcribeResult.TranscriptionJob.TranscriptionJobName;
+    console.log("Transcrição iniciada:", jobName);
+
+    // Verificar o status da transcrição em loop
+    let transcriptionJob;
+    let attempts = 0;
+    const maxAttempts = 20; // Número máximo de tentativas
+    const waitTime = 5000; // Tempo de espera em milissegundos
+
+    while (attempts < maxAttempts) {
+      transcriptionJob = await checkTranscriptionJob(jobName);
+
+      if (transcriptionJob.TranscriptionJobStatus === "COMPLETED") {
+        const transcriptionText = await getTranscriptionResult(
+          transcriptionJob.Transcript.TranscriptFileUri
+        );
+        return {
+          statusCode: 200,
+          body: JSON.stringify({
+            message: "Transcrição concluída!",
+            text: transcriptionText,
+          }),
+        };
+      } else if (transcriptionJob.TranscriptionJobStatus === "FAILED") {
+        console.error("Transcrição falhou:", transcriptionJob);
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ message: "Transcrição falhou." }),
+        };
+      }
+
+      // Log do status atual
+      console.log("Transcrição em andamento. Tentativa:", attempts + 1);
+
+      // Aguardar antes da próxima verificação
+      attempts++;
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
+    }
+
+    console.log("Não terminou ainda");
+    // Se atingiu o número máximo de tentativas
+    return {
+      statusCode: 202, // Transcrição ainda em andamento
+      body: JSON.stringify({
+        message: "Transcrição ainda em andamento.",
+        jobName: jobName,
+      }),
+    };
+  } catch (err) {
+    console.error("Erro:", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Erro ao fazer upload." }),
+    };
+  }
+};
+
+const transcribeAudio = async (event) => {
+  const fileName = event.headers["file-name"];
+
+  const params = {
+    TranscriptionJobName: `TranscriptionJob-${Date.now()}`,
+    LanguageCode: "pt-BR",
+    MediaFormat: "mp4",
+    Media: {
+      MediaFileUri: `https://s3.us-east1-amazonaws.com/${BUCKET_NAME}/${fileName}`,
+    },
+    OutputBucketName: BUCKET_NAME,
+  };
+
+  try {
+    const data = await transcribeService
+      .startTranscriptionJob(params)
+      .promise();
+    return data;
+  } catch (err) {
+    console.error("Erro ao iniciar a transcrição:", err);
+    throw new Error("Erro ao iniciar a transcrição.");
+  }
+};
+
+const checkTranscriptionJob = async (jobName) => {
+  const params = {
+    TranscriptionJobName: jobName,
+  };
+
+  try {
+    const data = await transcribeService.getTranscriptionJob(params).promise();
+    return data.TranscriptionJob;
+  } catch (err) {
+    console.error("Erro ao obter o status do trabalho de transcrição:", err);
+    throw new Error("Erro ao verificar o status da transcrição.");
+  }
+};
+
+const getTranscriptionResult = async (transcriptUri) => {
+  const response = await fetch(transcriptUri);
+  const transcriptData = await response.json();
+  return transcriptData.results.transcripts[0].transcript;
 };
 
 exports.hello = async (event) => {
