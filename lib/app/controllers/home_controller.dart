@@ -68,10 +68,10 @@ class HomeController extends GetxController {
     if (status == PermissionStatus.granted) {
       // Obter diretório de armazenamento
       Directory appDocDir = await getApplicationDocumentsDirectory();
-      String path = '${appDocDir.path}/meu_audio.aac';
-      // Iniciar gravação
+      String path = '${appDocDir.path}/meu_audio.wav';
+      // Iniciar gravaçãoR
       await audioRecorder.openRecorder();
-      await audioRecorder.startRecorder(codec: Codec.aacADTS, toFile: path);
+      await audioRecorder.startRecorder(codec: Codec.pcm16WAV, toFile: path);
       isRecording.value = true;
       filePath = path;
     } else {
@@ -79,83 +79,24 @@ class HomeController extends GetxController {
     }
   }
 
-  void upload() async {
+  void speechToText(String path) async {
+    final uri = Uri.parse(
+        'http://192.168.0.112:3000/speech-to-text'); // Altere para seu URL de produção
+    final request = http.MultipartRequest('POST', uri);
+
+    request.files.add(await http.MultipartFile.fromPath('audio', path));
+
     try {
-      player.play(DeviceFileSource(filePath));
-      final File audioFile = File(filePath);
-      final String base64Audio = await convertToBase64(filePath);
-      print(audioFile.uri.pathSegments.last);
-      // Criar o cabeçalho com o nome do arquivo
-      final Map<String, String> headers = {
-        'Content-Type': 'application/json',
-        'file-name': audioFile.uri.pathSegments.last, // Pega o nome do arquivo
-      };
-
-      // Criar o corpo da requisição
-      final Map<String, dynamic> body = {
-        'body': base64Audio,
-      };
-
-      // Enviar a requisição POST
-      final response = await http.post(
-        Uri.parse(
-            "https://4cpr8ijhx0.execute-api.us-east-1.amazonaws.com/upload"),
-        headers: headers,
-        body: jsonEncode(body),
-      );
-
-      // Verificar a resposta
+      final response = await request.send();
       if (response.statusCode == 200) {
-        print('Áudio enviado com sucesso: ${response.body}');
+        final responseData = await response.stream.toBytes();
+        final responseString = String.fromCharCodes(responseData);
+        print('Transcrição: $responseString');
       } else {
-        print(
-            'Falha ao enviar áudio: ${response.statusCode} - ${response.body}');
+        print('Erro: ${response.statusCode}');
       }
     } catch (e) {
-      print('Erro ao enviar áudio: $e');
+      print('Erro ao enviar: $e');
     }
-  }
-
-  void uploadAudio(String base64Audio) async {
-    print("Base64 Audio: $base64Audio"); // Verifique o valor do áudio em Base64
-
-    var uri = Uri.parse(
-        "https://4cpr8ijhx0.execute-api.us-east-1.amazonaws.com/transcribe");
-
-    // Cria o cabeçalho e o corpo da requisição
-    var request = http.Request('POST', uri)
-      ..headers['Content-Type'] = 'application/json'
-      ..headers['file-name'] = 'meu_audio.aac' // Nome do arquivo
-      ..body = jsonEncode({
-        'body': base64Audio,
-      });
-    try {
-      var response = await request.send();
-      if (response.statusCode == 200) {
-        print('Transcrição bem-sucedida!');
-      } else {
-        print('Falha na transcrição: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Erro ao enviar para Lambda: $e');
-    }
-  }
-
-  void speechToText() async {
-    String base64Audio = await convertToBase64(filePath);
-    print('Audio em Base64: $base64Audio');
-
-    uploadAudio(base64Audio);
-  }
-
-  Future<String> convertToBase64(String filePath) async {
-    // Ler o arquivo como bytes
-    print(filePath);
-    File file = File(filePath);
-    List<int> fileBytes = await file.readAsBytes();
-
-    // Converter bytes para Base64
-    String base64String = base64Encode(fileBytes);
-    return base64String;
   }
 }

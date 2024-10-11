@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.637.0",
+    "@deepgram/sdk": "^3.8.1",
     "aws-sdk": "^2.1687.0",
     "dotenv": "^16.4.5"
   }

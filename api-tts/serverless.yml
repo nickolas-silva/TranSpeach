@@ -47,15 +47,3 @@ functions:
       - httpApi:
           path: /translate
           method: post
-  transcribe:
-    handler: handler.transcribe
-    events:
-      - httpApi:
-          path: /transcribe
-          method: post
-  upload:
-    handler: handler.upload
-    events:
-      - httpApi:
-          path: /upload
-          method: post
