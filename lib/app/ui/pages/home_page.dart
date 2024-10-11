@@ -150,6 +150,8 @@ class HomePage extends GetView<HomeController> {
                                         if (controller.isRecording.value) {
                                           // stop recording
                                           controller.stopRecord();
+                                          controller.speechToText(
+                                              controller.filePath);
                                         } else {
                                           controller.startRecord();
                                         }

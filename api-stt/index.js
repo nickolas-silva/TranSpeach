@@ -16,7 +16,6 @@ const { createClient } = require("@deepgram/sdk");
 const deepgram = createClient(process.env.secretKey);
 
 app.post("/speech-to-text", upload.single("audio"), async (req, res) => {
-  console.log("Teste!");
   if (!req.file) {
     return res.status(400).send("Nenhum arquivo foi enviado.");
   }
@@ -30,15 +29,17 @@ app.post("/speech-to-text", upload.single("audio"), async (req, res) => {
       language: "pt-BR",
     }
   );
-
   if (error) {
     return {
       statusCode: 500,
       err: error.message,
     };
   } else {
+    const transcriptionText =
+      result.results.channels[0].alternatives[0].transcript;
+    console.log(transcriptionText);
     console.log(result);
-    return res.json(result);
+    return res.json(transcriptionText);
   }
 });
 
