@@ -9,17 +9,35 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 
 import 'package:permission_handler/permission_handler.dart';
+import 'package:transpeach/app/model/message.dart';
+import 'package:transpeach/app/service/messageService.dart';
 
 class HomeController extends GetxController {
-  final textMessageController = TextEditingController().obs;
+  final textMessageController = TextEditingController();
 
   String? _selectedLanguage;
   String? get selectedLanguage => _selectedLanguage;
   AudioPlayer player = AudioPlayer();
   FlutterSoundRecorder audioRecorder = FlutterSoundRecorder();
 
+  final messageText =
+      "".obs; // Variável para verificar se o campo de texto está vazio
   RxBool isRecording = false.obs;
   String filePath = "";
+  MessageService messageService = MessageService();
+  var messages = [].obs;
+
+  void saveMessage(Message message) async {
+    try {
+      Message newMessage = await messageService.save(message);
+      print(newMessage);
+      messages.clear();
+      messages.addAll(await messageService.getAll());
+    } catch (ex) {
+      rethrow;
+    }
+  }
+
   @override
   void onInit() async {
     // TODO: implement onInit
@@ -27,6 +45,12 @@ class HomeController extends GetxController {
     PermissionStatus status = await Permission.microphone.request();
     // player.play(DeviceFileSource(
     //     "/data/user/0/com.example.transpeach/app_flutter/meu_audio.mp4"));
+    messages.value = await messageService.getAll();
+    messages.refresh();
+
+    textMessageController.addListener(() {
+      messageText.value = textMessageController.text;
+    });
   }
 
   void selectLanguage(String? value) {

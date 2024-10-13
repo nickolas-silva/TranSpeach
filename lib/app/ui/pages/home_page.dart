@@ -10,20 +10,7 @@ import 'package:transpeach/app/ui/components/language_dropdown.dart';
 import 'package:transpeach/app/ui/components/message_card.dart';
 
 class HomePage extends GetView<HomeController> {
-  HomePage({super.key});
-
-  MessageService messageService = MessageService();
-  List<Message> messages = [];
-
-  void saveMessage(Message message) async {
-    try {
-      Message newMessage = await messageService.save(message);
-      print(newMessage);
-      messages.addAll(await messageService.getAll());
-    } catch (ex) {
-      rethrow;
-    }
-  }
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,11 +44,12 @@ class HomePage extends GetView<HomeController> {
               height: Get.height,
               width: Get.width,
               color: backgroundColor,
-              child: Column(
-                children: [
-                  for (var message in messages) MessageCard(message: message)
-                ],
-              ),
+              child: Obx(() => Column(
+                    children: [
+                      for (var message in controller.messages)
+                        MessageCard(message: message)
+                    ],
+                  )),
             ),
 
             //Inputas Sheet
@@ -114,8 +102,7 @@ class HomePage extends GetView<HomeController> {
                                     borderSide: BorderSide.none,
                                   ),
                                 ),
-                                controller:
-                                    controller.textMessageController.value,
+                                controller: controller.textMessageController,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -126,43 +113,41 @@ class HomePage extends GetView<HomeController> {
                                 color: primaryColor,
                                 shape: BoxShape.circle,
                               ),
-                              child: Obx(() => controller.textMessageController
-                                      .value.text.isNotEmpty
-                                  ? IconButton(
-                                      //função de mandar msg
-                                      onPressed: () {
-                                        Message newMessage = Message(
-                                            text: controller
-                                                .textMessageController
-                                                .value
-                                                .text,
-                                            sendAt: DateTime.now());
-                                        saveMessage(newMessage);
-                                      },
-                                      icon: const Icon(
-                                        Icons.send,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : TextButton(
-                                      //função de mandar msg
-                                      onPressed: () {
-                                        if (controller.isRecording.value) {
-                                          // stop recording
-                                          controller.stopRecord();
-                                          controller.speechToText(
-                                              controller.filePath);
-                                        } else {
-                                          controller.startRecord();
-                                        }
-                                      },
-                                      child: Icon(
-                                        controller.isRecording.value
-                                            ? Icons.cancel
-                                            : Icons.mic,
-                                        color: Colors.white,
-                                      ),
-                                    )),
+                              child: Obx(
+                                  () => controller.messageText.value.isNotEmpty
+                                      ? IconButton(
+                                          //função de mandar msg
+                                          onPressed: () {
+                                            Message newMessage = Message(
+                                                text: controller
+                                                    .textMessageController.text,
+                                                sendAt: DateTime.now());
+                                            controller.saveMessage(newMessage);
+                                          },
+                                          icon: const Icon(
+                                            Icons.send,
+                                            color: Colors.white,
+                                          ),
+                                        )
+                                      : TextButton(
+                                          //função de mandar msg
+                                          onPressed: () {
+                                            if (controller.isRecording.value) {
+                                              // stop recording
+                                              controller.stopRecord();
+                                              // controller.speechToText(
+                                              //     controller.filePath);
+                                            } else {
+                                              controller.startRecord();
+                                            }
+                                          },
+                                          child: Icon(
+                                            controller.isRecording.value
+                                                ? Icons.cancel
+                                                : Icons.mic,
+                                            color: Colors.white,
+                                          ),
+                                        )),
                             )
                           ],
                         )
