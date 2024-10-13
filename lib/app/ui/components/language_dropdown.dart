@@ -7,23 +7,20 @@ class LanguageDropdown extends StatefulWidget {
   final Function(String? value) onChanged;
   final String? value;
 
-
-  const LanguageDropdown({ 
-    super.key,
-    required this.onChanged,
-    required this.value
-  });
+  const LanguageDropdown(
+      {super.key, required this.onChanged, required this.value});
 
   @override
   State<LanguageDropdown> createState() => _LanguageDropdownState();
 }
 
 class _LanguageDropdownState extends State<LanguageDropdown> {
-  final List<DropdownMenuItem<String>> _dropDownMenuItens = buildDropdownMenuItens(TabIdiomas.idiomas);
+  final List<DropdownMenuItem<String>> _dropDownMenuItens =
+      buildDropdownMenuItens(TabIdiomas.idiomas);
 
-   @override
-   Widget build(BuildContext context) {
-    return Container(
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
       width: 150,
       child: DropdownButtonFormField<String>(
         decoration: const InputDecoration(
@@ -45,6 +42,4 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
       ),
     );
   }
-
-
 }

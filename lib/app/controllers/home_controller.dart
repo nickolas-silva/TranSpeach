@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 
 import 'package:permission_handler/permission_handler.dart';
+import 'package:transpeach/app/core/constants/tab/tab_idiomas.dart';
 import 'package:transpeach/app/model/message.dart';
 import 'package:transpeach/app/service/messageService.dart';
 
@@ -33,6 +34,7 @@ class HomeController extends GetxController {
       print(newMessage);
       messages.clear();
       messages.addAll(await messageService.getAll());
+      textMessageController.text = "";
     } catch (ex) {
       rethrow;
     }
@@ -54,13 +56,13 @@ class HomeController extends GetxController {
   }
 
   void selectLanguage(String? value) {
-    _selectedLanguage = value;
+    _selectedLanguage = TabIdiomas.idiomas[int.parse(value!)];
     update();
   }
 
   void textToSpeech(String frase) async {
     var url = Uri.parse(
-        "https://rw5nftwea2.execute-api.us-east-1.amazonaws.com/converter"); // url da minha função lambda
+        "https://4cpr8ijhx0.execute-api.us-east-1.amazonaws.com/converter"); // url da minha função lambda
 
     var response = await http.post(url,
         headers: {"Content-type": "application/json; charset=UTF-8"},
@@ -71,6 +73,23 @@ class HomeController extends GetxController {
       String urlToAudio = json["url_to_audio"];
       player.setSource(UrlSource(urlToAudio));
       player.resume();
+    } else {
+      print("Erro na requisição.");
+    }
+  }
+
+  void translate(String text) async {
+    var url = Uri.parse(
+        "https://4cpr8ijhx0.execute-api.us-east-1.amazonaws.com/translate"); // url da minha função lambda
+    var response = await http.post(url,
+        headers: {"Content-type": "application/json; charset=UTF-8"},
+        body:
+            json.encode({"text": text, "from": "pt", "to": _selectedLanguage}));
+    // na response, vai haver o link do aúdio que tá no bucket da aws
+    if (response.statusCode == 200) {
+      dynamic json = jsonDecode(response.body);
+      saveMessage(
+          Message(text: json["translated_text"], sendAt: DateTime.now()));
     } else {
       print("Erro na requisição.");
     }

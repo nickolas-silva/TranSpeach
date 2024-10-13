@@ -118,11 +118,13 @@ class HomePage extends GetView<HomeController> {
                                       ? IconButton(
                                           //função de mandar msg
                                           onPressed: () {
-                                            Message newMessage = Message(
-                                                text: controller
-                                                    .textMessageController.text,
-                                                sendAt: DateTime.now());
-                                            controller.saveMessage(newMessage);
+                                            controller.translate(controller
+                                                .textMessageController.text);
+                                            // Message newMessage = Message(
+                                            //     text: controller
+                                            //         .textMessageController.text,
+                                            //     sendAt: DateTime.now());
+                                            // controller.saveMessage(newMessage);
                                           },
                                           icon: const Icon(
                                             Icons.send,

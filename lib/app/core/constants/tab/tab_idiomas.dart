@@ -1,8 +1,8 @@
-class TabIdiomas{
+class TabIdiomas {
   static const List<String> idiomas = [
-    "Português",
-    "Inglês",
-    "Espanhol",
-    "Francês",
+    "pt",
+    "en",
+    "es",
+    "fr",
   ];
 }
