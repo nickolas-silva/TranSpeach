@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 class Message {
   int? id = 0;
   final String text;

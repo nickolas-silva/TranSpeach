@@ -11,7 +11,7 @@ import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:transpeach/app/core/constants/tab/tab_idiomas.dart';
 import 'package:transpeach/app/model/message.dart';
-import 'package:transpeach/app/service/messageService.dart';
+import 'package:transpeach/app/service/message_service.dart';
 
 class HomeController extends GetxController {
   final textMessageController = TextEditingController();
@@ -44,7 +44,7 @@ class HomeController extends GetxController {
   void onInit() async {
     // TODO: implement onInit
     super.onInit();
-    PermissionStatus status = await Permission.microphone.request();
+    //PermissionStatus status = await Permission.microphone.request();
     // player.play(DeviceFileSource(
     //     "/data/user/0/com.example.transpeach/app_flutter/meu_audio.mp4"));
     messages.value = await messageService.getAll();

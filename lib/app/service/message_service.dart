@@ -1,25 +1,25 @@
-import 'dart:ffi';
-
 import 'package:sqflite/sqflite.dart';
 import 'package:transpeach/app/core/constants/db_const.dart';
-import 'package:transpeach/app/core/persistence/databaseProvider.dart';
+import 'package:transpeach/app/core/persistence/database_provider.dart';
 import 'package:transpeach/app/model/message.dart';
 
 class MessageService {
-  static MessageService instance =
-      MessageService();
+  static MessageService instance = MessageService();
 
   Future<Message> save(Message message) async {
     try {
       final Database db = await DatabaseProvider().getDatabase();
 
       if (message.id != 0 && message.id != null) {
-        await db.update(DatabaseTables.MESSAGES.toShortString(), message.toJson(),
-            where: 'id = ?', whereArgs: [message.id]);
+        await db.update(
+          DatabaseTables.MESSAGES.toShortString(),
+          message.toJson(),
+          where: 'id = ?', 
+          whereArgs: [message.id]
+        );
         return message;
       }
-      return await getById(await db.insert(
-          DatabaseTables.MESSAGES.toShortString(), message.toJson()));
+      return await getById(await db.insert(DatabaseTables.MESSAGES.toShortString(), message.toJson()));
     } catch (ex) {
       rethrow;
     }
@@ -29,8 +29,11 @@ class MessageService {
     try {
       final Database db = await DatabaseProvider().getDatabase();
 
-      var data = await db.query(DatabaseTables.MESSAGES.toShortString(),
-          where: 'id = ?', whereArgs: [id]);
+      var data = await db.query(
+          DatabaseTables.MESSAGES.toShortString(),
+          where: 'id = ?',
+          whereArgs: [id]
+        );
 
       return Message.fromJson(data[0]);
     } catch (ex) {
@@ -43,8 +46,11 @@ class MessageService {
     try {
       final Database db = await DatabaseProvider().getDatabase();
 
-      await db.delete(DatabaseTables.MESSAGES.toShortString(),
-          where: 'id = ?', whereArgs: [id]);
+      await db.delete(
+        DatabaseTables.MESSAGES.toShortString(),
+        where: 'id = ?',
+        whereArgs: [id]
+      );
 
       return true;
     } catch (ex) {

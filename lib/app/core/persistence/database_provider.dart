@@ -1,6 +1,5 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:transpeach/app/core/constants/db_const.dart';
 import 'package:transpeach/app/core/persistence/data.dart';
 
 class DatabaseProvider{
