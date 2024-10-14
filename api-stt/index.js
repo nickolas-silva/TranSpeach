@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const { createClient } = require("@deepgram/sdk");
 
-const deepgram = createClient(process.env.secretKey);
+const deepgram = createClient('df480942d391d5f07e54d77caaf167734adbd241');
 
 app.post("/speech-to-text", upload.single("audio"), async (req, res) => {
   if (!req.file) {

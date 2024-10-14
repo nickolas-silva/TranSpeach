@@ -5,7 +5,6 @@ import 'package:transpeach/app/controllers/home_controller.dart';
 import 'package:transpeach/app/core/constants/default_const.dart';
 import 'package:transpeach/app/core/constants/img_file.dart';
 import 'package:transpeach/app/model/message.dart';
-import 'package:transpeach/app/service/messageService.dart';
 import 'package:transpeach/app/ui/components/language_dropdown.dart';
 import 'package:transpeach/app/ui/components/message_card.dart';
 
@@ -129,19 +128,16 @@ class HomePage extends GetView<HomeController> {
                                       ? IconButton(
                                           //função de mandar msg
                                           onPressed: () {
+                                            Message newMessage = Message(
+                                                text: controller
+                                                    .textMessageController.text,
+                                                sendAt: DateTime.now(),
+                                                isSender: true);
+                                            controller.saveMessage(newMessage);
                                             if (controller.selectedLanguage !=
                                                 null) {
                                               controller.translate(controller
                                                   .textMessageController.text);
-                                            } else {
-                                              Message newMessage = Message(
-                                                  text: controller
-                                                      .textMessageController
-                                                      .text,
-                                                  sendAt: DateTime.now(),
-                                                  isSender: true);
-                                              controller
-                                                  .saveMessage(newMessage);
                                             }
                                           },
                                           icon: const Icon(

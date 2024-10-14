@@ -92,8 +92,27 @@ class HomeController extends GetxController {
           text: json["translated_text"],
           sendAt: DateTime.now(),
           isSender: false));
+      //return json["translated_text"];
     } else {
       print("Erro na requisição.");
+    }
+  }
+
+  Future<String> translateStr(String text) async {
+    var url = Uri.parse(
+        "https://4cpr8ijhx0.execute-api.us-east-1.amazonaws.com/translate"); // url da minha função lambda
+    var response = await http.post(url,
+        headers: {"Content-type": "application/json; charset=UTF-8"},
+        body:
+            json.encode({"text": text, "from": "pt", "to": _selectedLanguage}));
+    // na response, vai haver o link do aúdio que tá no bucket da aws
+    if (response.statusCode == 200) {
+      dynamic json = jsonDecode(response.body);
+    
+      return json["translated_text"];
+    } else {
+      print("Erro na requisição.");
+      return "";
     }
   }
 
@@ -126,7 +145,7 @@ class HomeController extends GetxController {
 
   void speechToText(String path) async {
     final uri = Uri.parse(
-        'http://192.168.0.112:3001/speech-to-text'); // Altere para seu URL de produção
+        'http://10.215.8.221:3001/speech-to-text'); // Altere para seu URL de produção
     final request = http.MultipartRequest('POST', uri);
 
     request.files.add(await http.MultipartFile.fromPath('audio', path));
@@ -136,9 +155,17 @@ class HomeController extends GetxController {
       if (response.statusCode == 200) {
         final responseData = await response.stream.toBytes();
         final responseString = String.fromCharCodes(responseData);
-
         saveMessage(Message(
-            text: responseString, sendAt: DateTime.now(), isSender: false));
+            text: responseString,
+            sendAt: DateTime.now(),
+            isSender: true));
+        
+        if(selectedLanguage != null){
+          saveMessage(Message(text: await translateStr(responseString), sendAt: DateTime.now(), isSender: false));
+        } else {
+          saveMessage(Message(text: responseString, sendAt: DateTime.now(), isSender: false));
+        }
+        update();
       } else {
         print('Erro: ${response.statusCode}');
       }
