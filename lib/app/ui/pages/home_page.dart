@@ -44,11 +44,22 @@ class HomePage extends GetView<HomeController> {
               height: Get.height,
               width: Get.width,
               color: backgroundColor,
-              child: Obx(() => Column(
-                    children: [
-                      for (var message in controller.messages)
-                        MessageCard(message: message)
-                    ],
+              child: Obx(() => SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: SizedBox(
+                      height: 3000,
+                      child: Column(
+                        children: [
+                          for (var message in controller.messages)
+                            GestureDetector(
+                              child: MessageCard(message: message),
+                              onLongPress: () {
+                                controller.textToSpeech(message.text);
+                              },
+                            )
+                        ],
+                      ),
+                    ),
                   )),
             ),
 
@@ -118,13 +129,20 @@ class HomePage extends GetView<HomeController> {
                                       ? IconButton(
                                           //função de mandar msg
                                           onPressed: () {
-                                            controller.translate(controller
-                                                .textMessageController.text);
-                                            // Message newMessage = Message(
-                                            //     text: controller
-                                            //         .textMessageController.text,
-                                            //     sendAt: DateTime.now());
-                                            // controller.saveMessage(newMessage);
+                                            if (controller.selectedLanguage !=
+                                                null) {
+                                              controller.translate(controller
+                                                  .textMessageController.text);
+                                            } else {
+                                              Message newMessage = Message(
+                                                  text: controller
+                                                      .textMessageController
+                                                      .text,
+                                                  sendAt: DateTime.now(),
+                                                  isSender: true);
+                                              controller
+                                                  .saveMessage(newMessage);
+                                            }
                                           },
                                           icon: const Icon(
                                             Icons.send,
@@ -137,8 +155,8 @@ class HomePage extends GetView<HomeController> {
                                             if (controller.isRecording.value) {
                                               // stop recording
                                               controller.stopRecord();
-                                              // controller.speechToText(
-                                              //     controller.filePath);
+                                              controller.speechToText(
+                                                  controller.filePath);
                                             } else {
                                               controller.startRecord();
                                             }

@@ -88,8 +88,10 @@ class HomeController extends GetxController {
     // na response, vai haver o link do aúdio que tá no bucket da aws
     if (response.statusCode == 200) {
       dynamic json = jsonDecode(response.body);
-      saveMessage(
-          Message(text: json["translated_text"], sendAt: DateTime.now()));
+      saveMessage(Message(
+          text: json["translated_text"],
+          sendAt: DateTime.now(),
+          isSender: false));
     } else {
       print("Erro na requisição.");
     }
@@ -124,7 +126,7 @@ class HomeController extends GetxController {
 
   void speechToText(String path) async {
     final uri = Uri.parse(
-        'http://192.168.0.112:3000/speech-to-text'); // Altere para seu URL de produção
+        'http://192.168.0.112:3001/speech-to-text'); // Altere para seu URL de produção
     final request = http.MultipartRequest('POST', uri);
 
     request.files.add(await http.MultipartFile.fromPath('audio', path));
@@ -134,7 +136,9 @@ class HomeController extends GetxController {
       if (response.statusCode == 200) {
         final responseData = await response.stream.toBytes();
         final responseString = String.fromCharCodes(responseData);
-        print('Transcrição: $responseString');
+
+        saveMessage(Message(
+            text: responseString, sendAt: DateTime.now(), isSender: false));
       } else {
         print('Erro: ${response.statusCode}');
       }
